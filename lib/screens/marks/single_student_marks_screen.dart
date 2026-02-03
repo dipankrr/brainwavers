@@ -38,13 +38,36 @@ class _SingleStudentMarksScreenState extends State<SingleStudentMarksScreen> {
 
   bool _isLoading = false;
 
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _loadInitialData();
+  //   _initializeControllers();
+  //   _loadExistingMarks();
+  // }
+
   @override
   void initState() {
     super.initState();
-    _loadInitialData();
-    _initializeControllers();
-    _loadExistingMarks();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _init();
+    });
   }
+
+  Future<void> _init() async {
+    setState(() => _isLoading = true);
+
+    await _loadInitialData();
+    _initializeControllers();
+    await _loadExistingMarks();
+
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
+  }
+
+
 
   Future<void> _loadInitialData() async {
     final academicProvider = Provider.of<AcademicDataProvider>(context, listen: false);

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import '../../models/franchise_model.dart';
 import '../../providers/admin_provider.dart';
+import '../../providers/student_provider.dart';
 import '../../services/supabase_service.dart';
 import '../../widgets/common/custom_app_bar.dart';
 import '../../widgets/common/adaptive_button.dart';
@@ -12,6 +13,7 @@ import '../../widgets/common/loading_indicator.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../core/utils/responsive_utils.dart';
+import '../students/students_by_franchise.dart';
 
 class FranchiseScreen extends StatefulWidget {
   const FranchiseScreen({super.key});
@@ -28,6 +30,8 @@ class _FranchiseScreenState extends State<FranchiseScreen> {
       _loadData();
     });
   }
+
+  bool _isHovering = false;
 
   Future<void> _loadData() async {
     final franchiseProvider =
@@ -145,7 +149,24 @@ class _FranchiseScreenState extends State<FranchiseScreen> {
         itemCount: provider.franchises.length,
         itemBuilder: (context, index) {
           final franchiseItem = provider.franchises[index];
-          return _buildFranchiseCard(context, franchiseItem, provider);
+          return InkWell(
+              onHover: (value) {
+                setState(() {
+                  _isHovering = value;
+                });
+              },
+              onTap: () {
+                final studentProvider = context.read<StudentProvider>();
+
+                studentProvider.setFranchiseFilter(franchiseItem.id);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => FranchiseStudentsListScreen(franchise: franchiseItem,),
+                  ),
+                );
+              },
+              child: _buildFranchiseCard(context, franchiseItem, provider));
         },
       ),
     );
@@ -489,6 +510,7 @@ class _AddEditFranchiseDialogState extends State<AddEditFranchiseDialog> {
         id: widget.franchiseItem?.id ?? uuid.v4(),
         name: _nameController.text.trim(),
         createdAt: widget.franchiseItem?.createdAt ?? DateTime.now(),
+        balance: widget.franchiseItem?.balance ?? 0,
       );
 
       if (widget.franchiseItem == null) {

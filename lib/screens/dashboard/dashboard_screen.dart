@@ -238,9 +238,10 @@ class _DashboardScreenState extends State<DashboardScreen> with RouteAware{
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           children: [
+            if (Supabase.instance.client.auth.currentUser?.userMetadata?['role'] == "admin")
             _buildActionCard(
               context,
-              'Students',
+              'Your Students',
               Icons.people_outline,
               Colors.green,
                   () => Navigator.of(context).push(
@@ -250,9 +251,21 @@ class _DashboardScreenState extends State<DashboardScreen> with RouteAware{
               ),
             ),
             if (Supabase.instance.client.auth.currentUser?.userMetadata?['role'] == "superadmin")
+              _buildActionCard(
+                context,
+                'Franchises',
+                Icons.store,
+                Colors.blue,
+                    () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const FranchiseScreen(),
+                  ),
+                ),
+              ),
+            if (Supabase.instance.client.auth.currentUser?.userMetadata?['role'] == "superadmin")
             _buildActionCard(
               context,
-              'Student Verify',
+              'Verify Student',
               Icons.verified,
               Colors.blue,
                   () => Navigator.of(context).push(
@@ -272,18 +285,7 @@ class _DashboardScreenState extends State<DashboardScreen> with RouteAware{
                 ),
               ),
             ),
-            if (Supabase.instance.client.auth.currentUser?.userMetadata?['role'] == "superadmin")
-            _buildActionCard(
-              context,
-              'Add Franchise',
-              Icons.store,
-              Colors.blue,
-                  () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => const FranchiseScreen(),
-                ),
-              ),
-            ),
+
             // _buildActionCard(
             //   context,
             //   'PDF Gen',
@@ -351,6 +353,14 @@ class _DashboardScreenState extends State<DashboardScreen> with RouteAware{
                 ),
               ),
             ),
+            if (Supabase.instance.client.auth.currentUser?.userMetadata?['role'] == "superadmin")
+              _buildActionCard(
+                context,
+                'Others',
+                Icons.miscellaneous_services,
+                Colors.blue,
+                  (){}
+              ),
             // _buildActionCard(
             //   context,
             //   'Result',

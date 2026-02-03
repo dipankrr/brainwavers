@@ -136,13 +136,13 @@ class _ClassesScreenState extends State<ClassesScreen> {
         itemCount: provider.classes.length,
         itemBuilder: (context, index) {
           final classItem = provider.classes[index];
-          return _buildClassCard(context, classItem, provider);
+          return _buildClassCard(context, classItem, provider, index+1);
         },
       ),
     );
   }
 
-  Widget _buildClassCard(BuildContext context, Class classItem, AcademicDataProvider provider) {
+  Widget _buildClassCard(BuildContext context, Class classItem, AcademicDataProvider provider, int index) {
     final subjectsCount = provider.getSubjectsForClass(classItem.id).length;
 
     return Card(
@@ -166,7 +166,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
               ),
               child: Center(
                 child: Text(
-                  '${classItem.orderIndex}',
+                  index.toString(),
                   style: AppTextStyles.bodyMedium(context)!.copyWith(
                     fontWeight: FontWeight.w600,
                     color: AppColors.primary,
@@ -188,11 +188,30 @@ class _ClassesScreenState extends State<ClassesScreen> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    '$subjectsCount subject${subjectsCount != 1 ? 's' : ''}',
-                    style: AppTextStyles.bodyMedium(context)!.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        '$subjectsCount subject${subjectsCount != 1 ? 's' : ''}',
+                        style: AppTextStyles.bodyMedium(context)!.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                       // width: 40,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.1),
+                          //shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            ' 📆 ${classItem.orderIndex} month ',
+                            style: TextStyle(color: AppColors.primary, fontSize: 15, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -294,7 +313,7 @@ class _AddEditClassDialogState extends State<AddEditClassDialog> {
       _nameController.text = widget.classItem!.name;
       _orderController.text = widget.classItem!.orderIndex.toString();
     } else {
-      _orderController.text = '1';
+      _orderController.text = '3';
     }
   }
 
@@ -383,12 +402,12 @@ class _AddEditClassDialogState extends State<AddEditClassDialog> {
 
               CustomTextField(
                 controller: _orderController,
-                label: 'Order Index *',
-                hint: 'e.g., 1, 2, 3',
+                label: 'Course Duration in months *', // this was order index
+                hint: 'e.g., 3, 12, 18',
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter order index';
+                    return 'Please enter Course Duration months'; // this was order index
                   }
                   if (int.tryParse(value) == null) {
                     return 'Please enter a valid number';

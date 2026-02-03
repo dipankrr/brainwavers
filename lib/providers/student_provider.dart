@@ -15,6 +15,7 @@ class StudentProvider with ChangeNotifier {
   List<Class> _classes = [];
   List<Section> _sections = [];
   List<Franchise> _franchises = [];
+  String? _selectedFranchiseId;
 
   // -------------------------
   // FILTER STATES
@@ -51,6 +52,8 @@ class StudentProvider with ChangeNotifier {
   List<Class> get classes => _classes;
   List<Section> get sections => _sections;
   List<Franchise> get franchises => _franchises;
+  String? get selectedFranchiseId => _selectedFranchiseId;
+
 
   String? get selectedAcademicYearId => _selectedAcademicYearId;
   String? get selectedClassId => _selectedClassId;
@@ -61,11 +64,11 @@ class StudentProvider with ChangeNotifier {
 
   List<Student> get pendingStudents {
     // Filter students based on 'sent' status
-    print('_students');
+    //print('_students');
     List<Student> list = [..._students];
      list = list.where((student) => student.status == 'sent').toList();
-    print(list);
-    print(list.length);
+    //print(list);
+    //print(list.length);
     return list;
   }
 
@@ -137,6 +140,13 @@ class StudentProvider with ChangeNotifier {
       }
     });
 
+
+    // Franchise filter
+    if (_selectedFranchiseId != null) {
+      list = list
+          .where((s) => s.franchiseId == _selectedFranchiseId)
+          .toList();
+    }
 
     // 3️⃣ Apply FILTERS after sorting
     if (_selectedAcademicYearId != null) {
@@ -250,6 +260,17 @@ class StudentProvider with ChangeNotifier {
     }
     notifyListeners();
   }
+
+  void setFranchiseFilter(String? id) {
+    _selectedFranchiseId = id;
+    notifyListeners();
+  }
+
+  void clearFranchiseFilter() {
+    _selectedFranchiseId = null;
+    notifyListeners();
+  }
+
 
   // -------------------------
   // LOADERS

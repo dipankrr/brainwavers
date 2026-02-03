@@ -1,10 +1,10 @@
-import 'package:brainwavers/models/franchise_model.dart';
 import 'package:brainwavers/providers/franchise_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:brainwavers/core/constants/other_constants.dart';
 import 'package:brainwavers/screens/students/add_edit_student_screen.dart';
 import 'package:provider/provider.dart';
+import '../../models/franchise_model.dart';
 import '../../models/student_model.dart';
 import '../../widgets/common/custom_app_bar.dart';
 import '../../widgets/common/adaptive_button.dart';
@@ -17,33 +17,36 @@ import '../../core/utils/responsive_utils.dart';
 import '../../widgets/common/responsive_dropdown.dart';
 import '../marks/single_student_marks_screen.dart';
 
-class StudentsListScreen extends StatefulWidget {
-  const StudentsListScreen({super.key});
+class FranchiseStudentsListScreen extends StatefulWidget {
+  final Franchise franchise;
+
+  const FranchiseStudentsListScreen({
+    super.key,
+    required this.franchise,
+  });
 
   @override
-  State<StudentsListScreen> createState() => _StudentsListScreenState();
+  State<FranchiseStudentsListScreen> createState() =>
+      _FranchiseStudentsListScreenState();
 }
 
-class _StudentsListScreenState extends State<StudentsListScreen> {
+class _FranchiseStudentsListScreenState
+    extends State<FranchiseStudentsListScreen> {
 
   final ScrollController _scrollController = ScrollController();
- // bool _showBottomNav = true;
 
   @override
   void initState() {
     super.initState();
-    // _scrollController.addListener(() {
-    //   if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
-    //     // scrolling down → hide
-    //     if (_showBottomNav) setState(() => _showBottomNav = false);
-    //   } else if (_scrollController.position.userScrollDirection == ScrollDirection.forward) {
-    //     // scrolling up → show
-    //     if (!_showBottomNav) setState(() => _showBottomNav = true);
-    //   }
-    // });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      //bottomNavIndex.value = 2;
-      context.read<StudentProvider>().ensureInitialized();
+      final provider = context.read<StudentProvider>();
+
+      // Ensure data is loaded
+      provider.ensureInitialized();
+
+      // 🔑 Apply franchise filter
+      provider.setFranchiseFilter(widget.franchise.id);
     });
   }
 
@@ -51,14 +54,20 @@ class _StudentsListScreenState extends State<StudentsListScreen> {
     await context.read<StudentProvider>().ensureInitialized();
   }
 
+  @override
+  void dispose() {
+    // 🔑 IMPORTANT: clear franchise filter when leaving screen
+    context.read<StudentProvider>().clearFranchiseFilter();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: AppColors.background2,
-      //bottomNavigationBar: buildBottomNav(context, _showBottomNav),
-      appBar: const CustomAppBar(title: 'Students Management'),
+      appBar: CustomAppBar(
+        title: '${widget.franchise.name} Students',
+      ),
       body: Consumer<StudentProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading && provider.students.isEmpty) {
@@ -85,31 +94,8 @@ class _StudentsListScreenState extends State<StudentsListScreen> {
                 _buildActionsSection(context, provider),
                 const SizedBox(height: 20),
 
-                provider.selectedAcademicYearId == null
-                    ? Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(40),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.info_outline, size: 60, color: Colors.grey),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Please select an Academic Year to view students',
-                        style: AppTextStyles.bodyLarge(context)!.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                )
-                    : Container(
+
+                Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
                     border: Border.all(color: Colors.grey.shade300),
@@ -164,14 +150,9 @@ class _StudentsListScreenState extends State<StudentsListScreen> {
                                 _openSingleStudentMarksScreen(
                                     student, provider.selectedAcademicYearId!, 1,
                                     (){
-                                      provider.updateStudent(student.copyWith(status: "sent"));
-
+                                      provider.updateStudent(student.copyWith( status: "sent"));
                                       // final franchiseProvider = context.read<FranchiseProvider>();
-                                      // final fr = franchiseProvider.franchises.firstWhere((element) => element.id == student.franchiseId);
-                                      // final franchise = fr; //provider.franchises
-                                      //
-                                      // franchiseProvider.updateFranchise(franchise.copyWith(balance: 100));
-
+                                      // franchiseProvider.updateFranchise(widget.franchise.copyWith(balance: 100));
                                       Navigator.pop(context);
                                       setState(() {});
                                     }
@@ -307,30 +288,6 @@ class _StudentsListScreenState extends State<StudentsListScreen> {
       width: w < 480 ? w : 180,
       child: child,
     );
-  }
-
-  Future<void> _generateBulkPdf(context) async {
-    final provider = context.read<StudentProvider>();
-    final students = provider.tableStudents;
-
-    if (students.isEmpty) return;
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
-
-    try {
-      // await IdCardGenerator.downloadOrPrintPdf(
-      //   students: students,
-      //   backgroundAsset: 'template.png', //for from asset assets/asset.png
-      // );
-    } finally {
-      Navigator.pop(context); // remove the loading dialog
-    }
   }
 
 
