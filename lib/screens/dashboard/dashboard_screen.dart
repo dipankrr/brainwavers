@@ -20,7 +20,6 @@ import '../students/add_edit_student_screen.dart';
 import '../students/students_list_screen.dart';
 
 
-
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -210,6 +209,12 @@ class _DashboardScreenState extends State<DashboardScreen> with RouteAware{
               value: dashboardProvider.totalAcademicYears.toString(),
               icon: Icons.calendar_today,
             ),
+            if (Supabase.instance.client.auth.currentUser?.userMetadata?['role'] == "admin")
+            StatsCard(
+              title: "wallet",
+              value: dashboardProvider.franchiseBalance.toString() ,
+              icon: Icons.wallet,
+            ),
           ],
         ),
       ],
@@ -359,7 +364,11 @@ class _DashboardScreenState extends State<DashboardScreen> with RouteAware{
                 'Others',
                 Icons.miscellaneous_services,
                 Colors.blue,
-                  (){}
+                    () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const StudentsListScreen(),
+                  ),
+                ),
               ),
             // _buildActionCard(
             //   context,

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/supabase_service.dart';
 
 class DashboardProvider with ChangeNotifier {
@@ -9,6 +10,8 @@ class DashboardProvider with ChangeNotifier {
   int _totalAcademicYears = 0;
   int _totalMarksEntries = 0;
   int _totalSections = 0;
+  int _franchiseBal = 0;
+
 
   // Loading states
   bool _isLoading = false;
@@ -21,6 +24,7 @@ class DashboardProvider with ChangeNotifier {
   int get totalAcademicYears => _totalAcademicYears;
   int get totalMarksEntries => _totalMarksEntries;
   int get totalSections => _totalSections;
+  int get franchiseBalance => _franchiseBal;
 
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -36,6 +40,7 @@ class DashboardProvider with ChangeNotifier {
         _loadAcademicYearsCount(),
         _loadMarksCount(),
         _loadSectionsCount(),
+        _loadFranchiseBalance(),
       ]);
       _error = null;
     } catch (e) {
@@ -52,6 +57,14 @@ class DashboardProvider with ChangeNotifier {
       _totalStudents = students.length;
     } catch (e) {
       throw Exception('Failed to load students count: $e');
+    }
+  }
+
+  Future<void> _loadFranchiseBalance() async {
+    try {
+       _franchiseBal = await SupabaseService.getFranchiseBalance(Supabase.instance.client.auth.currentUser?.userMetadata?['franchise_id'] ?? '') ?? 0;
+    } catch (e) {
+      throw Exception('Failed to load balance: $e');
     }
   }
 

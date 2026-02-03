@@ -179,6 +179,22 @@ class SupabaseService {
   // ------------------------ Franchise CRUD ---------------------------------------
 
 
+  static Future<int?> getFranchiseBalance(String franchiseId) async {
+    try {
+      final response = await client
+          .from('franchises')
+          .select('balance')
+          .eq('id', franchiseId)
+          .single();
+
+      return response['balance'] as int?;
+    } catch (e) {
+      print('Error fetching franchise balance: $e');
+      return null;
+    }
+  }
+
+
   Future<List<Map<String, dynamic>>> fetchAdminsForFranchise(String franchiseId) async {
     try {
       final response = await Supabase.instance.client

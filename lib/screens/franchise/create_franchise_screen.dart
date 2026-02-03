@@ -1,6 +1,7 @@
 import 'package:brainwavers/providers/franchise_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../../models/franchise_model.dart';
 import '../../providers/admin_provider.dart';
@@ -211,12 +212,31 @@ class _FranchiseScreenState extends State<FranchiseScreen> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    'Created: ${_formatDate(franchiseItem.createdAt)}',
-                    style: AppTextStyles.bodyMedium(context)!.copyWith(
-                      color: AppColors.textSecondary,
-                      fontSize: 12,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        'Created: ${_formatDate(franchiseItem.createdAt)}',
+                        style: AppTextStyles.bodyMedium(context)!.copyWith(
+                          color: AppColors.textSecondary,
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        //width: 40,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          color: Colors.green.withOpacity(0.1),
+                          // shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: Text('Bal: ₹ ' + franchiseItem.balance.toString(), style: TextStyle(fontSize: 14, color: Colors.green, fontWeight: FontWeight.bold)),
+                          )
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 4),
 
@@ -276,7 +296,7 @@ class _FranchiseScreenState extends State<FranchiseScreen> {
                     ResponsiveUtils.responsiveValue(context, 18.0, 20.0, 22.0),
                 color: AppColors.primary,
               ),
-              onPressed: () => _showAddEditDialog(franchiseItem: franchiseItem),
+              onPressed: () => _showAddEditDialog(franchiseItem: franchiseItem), //todo:
             ),
             IconButton(
               icon: Icon(
@@ -487,6 +507,7 @@ class AddEditFranchiseDialog extends StatefulWidget {
 class _AddEditFranchiseDialogState extends State<AddEditFranchiseDialog> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _balanceController = TextEditingController();
   bool _isLoading = false;
 
   @override
@@ -494,6 +515,7 @@ class _AddEditFranchiseDialogState extends State<AddEditFranchiseDialog> {
     super.initState();
     if (widget.franchiseItem != null) {
       _nameController.text = widget.franchiseItem!.name;
+      _balanceController.text = widget.franchiseItem!.balance.toString();
     }
   }
 
@@ -510,7 +532,7 @@ class _AddEditFranchiseDialogState extends State<AddEditFranchiseDialog> {
         id: widget.franchiseItem?.id ?? uuid.v4(),
         name: _nameController.text.trim(),
         createdAt: widget.franchiseItem?.createdAt ?? DateTime.now(),
-        balance: widget.franchiseItem?.balance ?? 0,
+        balance: toInt(_balanceController.text.trim()) ??  0,
       );
 
       if (widget.franchiseItem == null) {
@@ -578,6 +600,17 @@ class _AddEditFranchiseDialogState extends State<AddEditFranchiseDialog> {
                   return null;
                 },
               ),
+              const SizedBox(height: 20),
+              CustomTextField(
+                controller: _balanceController,
+                label: 'Balance (only digit)',
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter balance';
+                  }
+                  return null;
+                },
+              ),
               const SizedBox(height: 24),
               Row(
                 children: [
@@ -608,6 +641,7 @@ class _AddEditFranchiseDialogState extends State<AddEditFranchiseDialog> {
   @override
   void dispose() {
     _nameController.dispose();
+    _balanceController.dispose();
     super.dispose();
   }
 }
